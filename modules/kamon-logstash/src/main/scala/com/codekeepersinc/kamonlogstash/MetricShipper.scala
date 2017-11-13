@@ -28,7 +28,7 @@ object MetricShipper {
   def props(config: ShipperConfig): Props = Props(new MetricShipper(config))
 }
 
-class MetricShipper(config: ShipperConfig) extends Actor with ActorLogging with Stash {
+class MetricShipper(config: ShipperConfig) extends Actor with ActorLogging {
 
   protected final val LOG_SEPARATOR = "\r\n"
 
@@ -45,10 +45,9 @@ class MetricShipper(config: ShipperConfig) extends Actor with ActorLogging with 
 
   def waitForClient: Receive = {
     case LogstashWatcher.UseClient(client) => {
-      unstashAll()
       context become (connected(client), discardOld = true)
     }
-    case l: List[MetricLogger.Metric] => stash()
+    case l: List[MetricLogger.Metric] => { /*metrics will be dropped*/ }
   }
 
   override def preStart(): Unit = watcher ! LogstashWatcher.Connect
